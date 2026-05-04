@@ -23,7 +23,7 @@ public class GlobalExceptionHandler {
     public ResponseEntity<?> handleNotFound(EmptyResultDataAccessException ex) {
         Map<String, Object> error = new HashMap<>();
         error.put("success", false);
-        error.put("error", "Task not found");
+        error.put("message", "Task not found");
         return new ResponseEntity<>(error, HttpStatus.NOT_FOUND);
     }
 }

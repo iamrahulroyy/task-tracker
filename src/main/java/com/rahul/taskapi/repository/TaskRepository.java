@@ -16,21 +16,20 @@ public class TaskRepository {
         this.jdbcTemplate = jdbcTemplate;
     }
 
-    // CREATE
+    // CREATE — returns generated id via PostgreSQL RETURNING clause
     public int createTask(Task task) {
-        String sql = "INSERT INTO tasks (title, description, status) VALUES (?, ?, ?)";
-        return jdbcTemplate.update(sql,
+        String sql = "INSERT INTO tasks (title, description, status) VALUES (?, ?, ?) RETURNING id";
+        return jdbcTemplate.queryForObject(sql, Integer.class,
                 task.getTitle(),
                 task.getDescription(),
                 task.getStatus()
         );
     }
 
-    // GET ALL
-    public List<Task> getAllTasks() {
-        String sql = "SELECT * FROM tasks ORDER BY id DESC";
-
-        return jdbcTemplate.query(sql, (rs, rowNum) -> mapRow(rs));
+    // GET ALL (with pagination)
+    public List<Task> getAllTasks(int page, int size) {
+        String sql = "SELECT * FROM tasks ORDER BY id DESC LIMIT ? OFFSET ?";
+        return jdbcTemplate.query(sql, (rs, rowNum) -> mapRow(rs), size, page * size);
     }
 
     // GET BY ID
@@ -51,9 +50,24 @@ public class TaskRepository {
         return task;
     }
 
-    public List<Task> getTasksByStatus(String status) {
-        String sql = "SELECT * FROM tasks WHERE status = ? ORDER BY id DESC";
+    public List<Task> getTasksByStatus(String status, int page, int size) {
+        String sql = "SELECT * FROM tasks WHERE status = ? ORDER BY id DESC LIMIT ? OFFSET ?";
+        return jdbcTemplate.query(sql, (rs, rowNum) -> mapRow(rs), status, size, page * size);
+    }
 
-        return jdbcTemplate.query(sql, (rs, rowNum) -> mapRow(rs), status);
+    // UPDATE
+    public int updateTask(Task task) {
+        String sql = "UPDATE tasks SET title = ?, description = ?, status = ? WHERE id = ?";
+        return jdbcTemplate.update(sql,
+                task.getTitle(),
+                task.getDescription(),
+                task.getStatus(),
+                task.getId());
+    }
+
+    // DELETE
+    public int deleteTask(int id) {
+        String sql = "DELETE FROM tasks WHERE id = ?";
+        return jdbcTemplate.update(sql, id);
     }
 }

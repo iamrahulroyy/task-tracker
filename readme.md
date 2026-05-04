@@ -18,9 +18,11 @@ Built to demonstrate backend fundamentals using raw SQL (no ORM).
 ## 📌 Features
 
 * Create Task (POST)
-* Get All Tasks (GET)
+* Get All Tasks (GET) with pagination
 * Get Task by ID (GET)
-* Filter Tasks by Status (GET with query param)
+* Filter Tasks by Status (GET with query param + pagination)
+* Update Task (PUT)
+* Delete Task (DELETE)
 * Input validation with proper error handling
 * Global exception handling (400 / 404 responses)
 
@@ -48,11 +50,56 @@ Request:
 
 **GET /tasks**
 
+Supports pagination and optional status filter:
+
+```
+GET /tasks
+GET /tasks?status=PENDING
+GET /tasks?page=0&size=10
+GET /tasks?status=IN_PROGRESS&page=1&size=5
+```
+
+| Param | Required | Default | Description |
+|---|---|---|---|
+| `status` | No | — | Filter by `PENDING`, `IN_PROGRESS`, or `DONE` |
+| `page` | No | `0` | Page number (0-indexed) |
+| `size` | No | `10` | Results per page |
+
 ---
 
 ### 🔹 Get Task by ID
 
 **GET /tasks/{id}**
+
+---
+
+### 🔹 Update Task
+
+**PUT /tasks/{id}**
+
+Request body (same shape as POST):
+
+```json
+{
+  "title": "Updated title",
+  "description": "Updated details",
+  "status": "IN_PROGRESS"
+}
+```
+
+> `status` is optional on update — if omitted, the existing status is kept.
+
+---
+
+### 🔹 Delete Task
+
+**DELETE /tasks/{id}**
+
+Returns:
+
+```json
+{ "success": true, "message": "Task deleted" }
+```
 
 ---
 
