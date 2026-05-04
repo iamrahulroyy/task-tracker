@@ -16,7 +16,7 @@ public class TaskRepository {
         this.jdbcTemplate = jdbcTemplate;
     }
 
-    // CREATE — returns generated id via PostgreSQL RETURNING clause
+    // insert task and get back the generated id
     public int createTask(Task task) {
         String sql = "INSERT INTO tasks (title, description, status) VALUES (?, ?, ?) RETURNING id";
         return jdbcTemplate.queryForObject(sql, Integer.class,
@@ -26,36 +26,25 @@ public class TaskRepository {
         );
     }
 
-    // GET ALL (with pagination)
+    // get all tasks, newest first, with pagination
     public List<Task> getAllTasks(int page, int size) {
         String sql = "SELECT * FROM tasks ORDER BY id DESC LIMIT ? OFFSET ?";
         return jdbcTemplate.query(sql, (rs, rowNum) -> mapRow(rs), size, page * size);
     }
 
-    // GET BY ID
+    // get a single task by id
     public Task getTaskById(int id) {
         String sql = "SELECT * FROM tasks WHERE id = ?";
-
         return jdbcTemplate.queryForObject(sql, (rs, rowNum) -> mapRow(rs), id);
     }
 
-    // ROW MAPPING
-    private Task mapRow(ResultSet rs) throws java.sql.SQLException {
-        Task task = new Task();
-        task.setId(rs.getInt("id"));
-        task.setTitle(rs.getString("title"));
-        task.setDescription(rs.getString("description"));
-        task.setStatus(rs.getString("status")); 
-        task.setCreatedAt(rs.getTimestamp("created_at").toLocalDateTime());
-        return task;
-    }
-
+    // filter by status, also paginated
     public List<Task> getTasksByStatus(String status, int page, int size) {
         String sql = "SELECT * FROM tasks WHERE status = ? ORDER BY id DESC LIMIT ? OFFSET ?";
         return jdbcTemplate.query(sql, (rs, rowNum) -> mapRow(rs), status, size, page * size);
     }
 
-    // UPDATE
+    // update title, description and status
     public int updateTask(Task task) {
         String sql = "UPDATE tasks SET title = ?, description = ?, status = ? WHERE id = ?";
         return jdbcTemplate.update(sql,
@@ -65,9 +54,20 @@ public class TaskRepository {
                 task.getId());
     }
 
-    // DELETE
+    // delete task by id
     public int deleteTask(int id) {
         String sql = "DELETE FROM tasks WHERE id = ?";
         return jdbcTemplate.update(sql, id);
+    }
+
+    // map result set row to Task object
+    private Task mapRow(ResultSet rs) throws java.sql.SQLException {
+        Task task = new Task();
+        task.setId(rs.getInt("id"));
+        task.setTitle(rs.getString("title"));
+        task.setDescription(rs.getString("description"));
+        task.setStatus(rs.getString("status"));
+        task.setCreatedAt(rs.getTimestamp("created_at").toLocalDateTime());
+        return task;
     }
 }

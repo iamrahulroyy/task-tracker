@@ -1,7 +1,7 @@
 # Task API (Spring Boot + PostgreSQL)
 
 A RESTful backend service to manage tasks with status tracking, validation, and filtering.
-Built to demonstrate backend fundamentals using raw SQL (no ORM).
+This project was built as part of an assignment to demonstrate backend fundamentals using Spring Boot and raw SQL (JdbcTemplate).
 
 ---
 
@@ -87,7 +87,7 @@ Request body (same shape as POST):
 }
 ```
 
-> `status` is optional on update — if omitted, the existing status is kept.
+> `status` is optional on update — if not sent, the existing status is kept.
 
 ---
 
@@ -95,11 +95,7 @@ Request body (same shape as POST):
 
 **DELETE /tasks/{id}**
 
-Returns:
-
-```json
-{ "success": true, "message": "Task deleted" }
-```
+Returns `204 No Content` on success.
 
 ---
 
@@ -144,13 +140,13 @@ CREATE DATABASE taskdb;
 
 ### 2. Configure Environment
 
-Copy `.env.example` to a new file named `.env` and fill in your database credentials:
+Copy `.env.example` to `.env` and fill in your database credentials:
 
 ```bash
 cp .env.example .env
 ```
 
-**Note:** The `.env` file is ignored by Git for security.
+**Note:** The `.env` file is ignored by Git so credentials don't get pushed.
 
 ---
 
@@ -178,19 +174,20 @@ mvnw.cmd spring-boot:run
 
 ## 🧠 Design Decisions
 
-* Used **JdbcTemplate** instead of ORM to demonstrate SQL handling
-* Implemented **manual validation** for input control
-* Used **enum-based validation** for task status
-* Added **global exception handler** for clean API responses
-* Implemented **filtering via query parameters**
-* Used **Environment Variables** via `.env` for secure configuration management
+* Used **JdbcTemplate** instead of JPA/ORM — I wanted to write raw SQL and understand what's actually happening at the DB level
+* Kept **manual validation** in the service layer — easier to control what error message goes back to the client
+* Used an **enum for task status** so invalid values get caught with a clear 400 response instead of inserting garbage into the DB
+* Added a **global exception handler** so error responses are always the same JSON format
+* Used a `.env` file for DB credentials instead of hardcoding them in `application.properties`
+
+This project focuses on simplicity and correctness over over-engineering, keeping the code easy to understand and explain.
 
 ---
 
 ## 📬 Notes
 
-* Setup your `.env` file with database credentials before running
-* Ensure PostgreSQL is running locally
+* Make sure PostgreSQL is running before starting the app
+* Setup the `.env` file first — app won't start without DB credentials
 
 ---
 
